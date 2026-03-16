@@ -1,11 +1,38 @@
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Course, Choice, Submission, Enrollment
+
+
+def submit(request, course_id):
+
+    course = get_object_or_404(Course, pk=course_id)
+
+    if request.method == "POST":
+
+        selected_choices = request.POST.getlist('choice')
+
+        enrollment = Enrollment.objects.first()
+
+        submission = Submission.objects.create(enrollment=enrollment)
+
+        for choice_id in selected_choices:
+
+            choice = Choice.objects.get(pk=choice_id)
+
+            submission.choices.add(choice)
+
+        return redirect('show_exam_result',
+                        course_id=course.id,
+                        submission_id=submission.id)
+
+
 def show_exam_result(request, course_id, submission_id):
 
     submission = get_object_or_404(Submission, pk=submission_id)
 
     choices = submission.choices.all()
 
-    total = choices.count()
     score = 0
+    total = choices.count()
 
     for choice in choices:
         if choice.is_correct:
