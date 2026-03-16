@@ -3,9 +3,11 @@ from .models import Course, Question, Choice, Submission
 
 
 def submit(request, course_id):
+
     course = get_object_or_404(Course, pk=course_id)
 
     if request.method == "POST":
+
         selected_choices = request.POST.getlist('choice')
 
         submission = Submission.objects.create()
@@ -14,12 +16,16 @@ def submit(request, course_id):
             choice = Choice.objects.get(pk=choice_id)
             submission.choices.add(choice)
 
-        return redirect('onlinecourse:show_exam_result',
-                        course_id=course.id,
-                        submission_id=submission.id)
+        return redirect(
+            'onlinecourse:show_exam_result',
+            course_id=course.id,
+            submission_id=submission.id
+        )
 
 
 def show_exam_result(request, course_id, submission_id):
+
+    course = get_object_or_404(Course, pk=course_id)
 
     submission = get_object_or_404(Submission, pk=submission_id)
 
@@ -33,9 +39,10 @@ def show_exam_result(request, course_id, submission_id):
             score += 1
 
     context = {
+        'course': course,
+        'choices': choices,
         'score': score,
-        'total': total,
-        'course': course_id
+        'total': total
     }
 
     return render(request, 'exam_result_bootstrap.html', context)
